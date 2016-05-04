@@ -5,7 +5,8 @@
 
 import socket, ssl, re, time
 
-# 아래 setting.py 에서 설정값을 바꿔 주세요.
+# 아래는 기본 설정값 파일입니다. 봇에 따라 바꿔주시면 됩니다.
+
 from setting import *
 
 # 아래는 사용자가 내용을 정의하는 함수들입니다.
@@ -37,10 +38,7 @@ def onnooped(channel, nick):
     return '구?'
 # 일반적인 대화
 def ondialog(channel, nick, text):
-    if text == '시리우스 피죤 물어!' or text == '시리우스 비둘기 물어!':
-        time.sleep(1)
-        return '구구궄!!! 괴롭히지 말라구! ㅠㅠ'
-    elif text.find('닭둘기') != -1:
+    if text.find('닭둘기') != -1:
         deop(channel, nick, '구국.. 닭둘기라 부르지 말라구!')
     elif text.startswith('#'):
         if(len(text) == 4):
@@ -63,6 +61,9 @@ def ondialog(channel, nick, text):
                 return '({:d}, {:d}, {:d})'.format(r,g,b)
             except:
                 deop(channel, nick, '이상한 값 넣지 말라구!')
+    elif text == '시리우스 피죤 물어!' or '시리우스 비둘기 물어!':
+        time.sleep(0.5)
+        return '구구!! 피죤 살려!! ㅠㅠ'
 
 # 불렀을 때
 def oncalled(channel, nick, text):
@@ -73,6 +74,66 @@ def oncalled(channel, nick, text):
     elif text == '밥 먹자':
         return '구구~! 마시쪙? 마시쪙!'
 
+
+elements = '. H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu  Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Fl Lv'
+bonelem = elements.split(' ')
+elemlist = elements.upper().split(' ')
+
+def whichelem(x):
+    try:
+        return elemlist.index(x)
+    except:
+        return 0;
+    
+def chemi(word):
+
+    if word == '':
+        return '불가능'
+
+    word = str(word).upper()
+
+    whatelem = [128]
+    whatelem.append(whichelem(word[0]))
+    whereelem = [3, 1]
+
+    if len(word) == 1:
+        if whatelem[1] == 0:
+            return '불가능'
+        else:
+            return bonelem[whatelem[1]]
+
+    # word[0:i] 가 되는지 확인
+    for i in range(2, len(word)+1):
+        x = whichelem(word[i-1])
+        y = whichelem(word[i-2:i])
+        if whatelem[i-2] != 0 and y != 0:
+            whereelem.append(2)
+            whatelem.append(y)
+        elif whatelem[i-1] != 0 and x != 0:
+            whereelem.append(1)
+            whatelem.append(x)
+        else:
+            whereelem.append(0)
+            whatelem.append(0)
+    
+    i = len(word)
+
+    if whatelem[i] == 0:
+        return '불가능'
+
+    bonlist = []
+    while whereelem[i] != 3:
+        bonlist.append(whatelem[i])
+        i = i - whereelem[i]
+
+    bonlist.reverse()
+
+    res = ''
+    for i in bonlist:
+        res = res + bonelem[i]
+
+    return res
+        
 
 # 명령어
 def oncommand(channel, nick, command, args):
@@ -87,6 +148,8 @@ def oncommand(channel, nick, command, args):
             return res
         except:
             deop(channel, nick, '이상한 값 넣지 말라구!')
+    if command == '!chemi' and len(args) == 1:
+        return '분석 결과: ' + chemi(args[0])
 
 # 여기부터 엔진 부분.
 
