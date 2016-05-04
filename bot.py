@@ -3,17 +3,10 @@
 # 피죤 IRC 봇 엔진 By 이승우
 # 소스 일부는 norang님의 치즈봇에서 가져왔음을 밝힙니다.
 
-import socket, ssl, re
+import socket, ssl, re, time
 
-# 아래는 기본 설정값입니다. 봇에 따라 바꿔주시면 됩니다.
-
-HOST = "irc.uriirc.org"     # IRC 서버 주소
-PORT = 16664                # IRC 포트
-ID = "Columbiade"           # 봇 ID
-NICK = '피죤'               # 봇 닉네임
-FIRSTCHAN = '#bot-world'     # 실행되었을때 들어갈 채널
-INVITABLE = True            # 주인 외에도 초대 가능한지
-MASTERID = "lsw8075"        # 주인 ID
+# 아래 setting.py 에서 설정값을 바꿔 주세요.
+from setting import *
 
 # 아래는 사용자가 내용을 정의하는 함수들입니다.
 # 만약 함수가 문자열을 반환한다면, 채널에 바로 출력합니다.
@@ -44,7 +37,10 @@ def onnooped(channel, nick):
     return '구?'
 # 일반적인 대화
 def ondialog(channel, nick, text):
-    if text.find('닭둘기') != -1:
+    if text == '시리우스 피죤 물어!' or text == '시리우스 비둘기 물어!':
+        time.sleep(1)
+        return '구구궄!!! 괴롭히지 말라구! ㅠㅠ'
+    elif text.find('닭둘기') != -1:
         deop(channel, nick, '구국.. 닭둘기라 부르지 말라구!')
     elif text.startswith('#'):
         if(len(text) == 4):
