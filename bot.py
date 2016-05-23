@@ -99,7 +99,7 @@ def oncommand(channel, nick, command, args):
 
 # 엔진에서 사용하는 전역 값
 
-chanlist = [FIRSTCHAN] # 채널 리스트
+chanlist = [] # 채널 리스트
 ismaster = False # 현재 마스터인지 확인하는 전역 변수. nick이 인자로 있는 콜백 함수 안에서만 써 주세요
 UTF8 = 'utf-8'
 
