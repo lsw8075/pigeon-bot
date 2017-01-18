@@ -38,8 +38,21 @@ def onnooped(channel, nick):
     return '구?'
 # 일반적인 대화
 def ondialog(channel, nick, text):
+    text.strip('\x02\x03\x1D\x1F\x16\x0F')
+    
+    if channel == "#botworld" and len(text) >= 3 and text[0:1] == "%":
+        send_msg(channel, "**C언어");
+        send_msg(channel, "#include \"./shell.h\"");
+        send_msg(channel, "$(\"" + text[2:] + "\")");
+        send_msg(channel, "**fin");
+	
+ 
     if text.find('닭둘기') != -1:
         deop(channel, nick, '구국.. 닭둘기라 부르지 말라구!')
+    elif len(text) >= 4 and text[-4:] == ' 주거라':
+        if text[:-4] in {'베네치아', '피죤', 'pigeon', 'lsw8075', '이승우', '승우'}:
+            text = nick + ' 주거라'        
+        deop(channel, text[:-4], '구구구~! ' + text[:-4] + ' 공격~!!!!')
     elif text.startswith('#'):
         if(len(text) == 4):
             try:
@@ -50,7 +63,7 @@ def ondialog(channel, nick, text):
                     raise
                 return '({:d}, {:d}, {:d})'.format(r,g,b)
             except:
-                deop(channel, nick, '이상한 값 넣지 말라구!')
+                return '이상한 값 넣지 말라구!'
         if(len(text) == 7):
             try:
                 r = int(text[1:3], 16)
@@ -60,10 +73,7 @@ def ondialog(channel, nick, text):
                     raise
                 return '({:d}, {:d}, {:d})'.format(r,g,b)
             except:
-                deop(channel, nick, '이상한 값 넣지 말라구!')
-    elif text == '시리우스 피죤 물어!' or text == '시리우스 비둘기 물어!':
-        time.sleep(0.5)
-        return '구구!! 피죤 살려!! ㅠㅠ'
+                return '이상한 값 넣지 말라구!'
 
 # 불렀을 때
 def oncalled(channel, nick, text):
@@ -75,9 +85,10 @@ def oncalled(channel, nick, text):
         return '구구~! 마시쪙? 마시쪙!'
 
 from chemi import tochemi       
-
+from gold import getgold
 # 명령어
 def oncommand(channel, nick, command, args):
+
     if command == '!color' and len(args) == 3:
         try:
             r = int(args[0])
@@ -88,13 +99,15 @@ def oncommand(channel, nick, command, args):
             res = '#{:02x}{:02x}{:02x}'.format(r, g, b)
             return res
         except:
-            deop(channel, nick, '이상한 값 넣지 말라구!')
+            return '이상한 값 넣지 말라구!'
     if command == '!chemi' and len(args) > 0:
         res = '분석 결과: '
         for arg in args:
             res = res + tochemi(arg) + ' ' 
         return res
-
+    if command == '!시세' and len(args) == 1:
+        if args[0] == '금':
+            return '오늘의 금 시세: 그램당' + getgold() + '원'
 # 여기부터 엔진 부분.
 
 # 엔진에서 사용하는 전역 값
@@ -217,7 +230,7 @@ def run():
             irc.send(bytes("PONG :pingpong\n", UTF8))
             print("Pingpong")
             continue
-        if ircmsg_raw[0] != ':':
+        if len(ircmsg_raw) > 0 and ircmsg_raw[0] != ':':
             continue
 
         # 가공 후 각 메시지별로 처리
@@ -261,6 +274,11 @@ def run():
 # 프로그램 초기화 부분
 
 if __name__ == "__main__":
+    from sys import argv
+    if len(argv) > 2:
+        HOST = argv[1]
+        PORT = int(argv[2])
+        FIRSTCHAN = '#' + argv[3]
     irc_raw = socket.socket()
     irc_raw.connect((HOST, PORT))
     irc = ssl.wrap_socket(irc_raw)
